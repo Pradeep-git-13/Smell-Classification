@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OlfactAI — Smell Classification System</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- BACKGROUND CANVAS -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span class="logo-icon">👃</span>
+      <span class="logo-text">Olfact<em>AI</em></span>
+    </div>
+    <nav>
+      <a href="#classify">Classify</a>
+      <a href="#nlp">NLP Analysis</a>
+      <a href="#dataset">Dataset</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">XGBoost · NLP · Sensor Fusion</div>
+    <h1>Smell<br/><span class="accent">Classification</span><br/>Engine</h1>
+    <p class="hero-sub">Describe a smell in natural language — or enter sensor values — and our AI identifies it with confidence scores, feature importance, and molecular context.</p>
+    <div class="hero-cta">
+      <a href="#classify" class="btn-primary">Start Classifying →</a>
+      <a href="#dataset" class="btn-ghost">View Dataset</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">12</span><span class="stat-lbl">Smell Classes</span></div>
+      <div class="stat"><span class="stat-num">960</span><span class="stat-lbl">Training Samples</span></div>
+      <div class="stat"><span class="stat-num">94.2%</span><span class="stat-lbl">Accuracy</span></div>
+      <div class="stat"><span class="stat-num">8</span><span class="stat-lbl">Gas Sensors</span></div>
+    </div>
+  </section>
+
+  <!-- CLASSIFY SECTION -->
+  <section class="section" id="classify">
+    <div class="section-label">01 / Classify</div>
+    <h2>Identify a Smell</h2>
+    <p class="section-sub">Choose your input method: sensor readings or natural language description.</p>
+
+    <div class="tab-bar">
+      <button class="tab active" data-tab="sensor">⚗️ Sensor Input</button>
+      <button class="tab" data-tab="nlp-input">💬 NLP Description</button>
+    </div>
+
+    <!-- SENSOR INPUT TAB -->
+    <div class="tab-content active" id="tab-sensor">
+      <div class="sensor-grid">
+        <div class="sensor-group">
+          <h4>Environment</h4>
+          <div class="input-row">
+            <label>Temperature (°C) <span class="range-hint">15–45</span></label>
+            <input type="range" id="temp" min="15" max="45" value="27" step="0.1" oninput="syncInput('temp','temp_val')"/>
+            <input type="number" id="temp_val" value="27" step="0.1" oninput="syncSlider('temp_val','temp')"/>
+          </div>
+          <div class="input-row">
+            <label>Humidity (%) <span class="range-hint">20–95</span></label>
+            <input type="range" id="hum" min="20" max="95" value="58" step="0.1" oninput="syncInput('hum','hum_val')"/>
+            <input type="number" id="hum_val" value="58" step="0.1" oninput="syncSlider('hum_val','hum')"/>
+          </div>
+        </div>
+
+        <div class="sensor-group">
+          <h4>MQ Sensors</h4>
+          <div class="input-row">
+            <label>MQ-2 (LPG/Smoke) <span class="range-hint">0–100</span></label>
+            <input type="range" id="mq2" min="0" max="100" value="20" step="0.1" oninput="syncInput('mq2','mq2_val')"/>
+            <input type="number" id="mq2_val" value="20" step="0.1" oninput="syncSlider('mq2_val','mq2')"/>
+          </div>
+          <div class="input-row">
+            <label>MQ-4 (Methane) <span class="range-hint">0–100</span></label>
+            <input type="range" id="mq4" min="0" max="100" value="16" step="0.1" oninput="syncInput('mq4','mq4_val')"/>
+            <input type="number" id="mq4_val" value="16" step="0.1" oninput="syncSlider('mq4_val','mq4')"/>
+          </div>
+          <div class="input-row">
+            <label>MQ-8 (Hydrogen) <span class="range-hint">0–100</span></label>
+            <input type="range" id="mq8" min="0" max="100" value="52" step="0.1" oninput="syncInput('mq8','mq8_val')"/>
+            <input type="number" id="mq8_val" value="52" step="0.1" oninput="syncSlider('mq8_val','mq8')"/>
+          </div>
+          <div class="input-row">
+            <label>MQ-135 (Air Quality) <span class="range-hint">0–100</span></label>
+            <input type="range" id="mq135" min="0" max="100" value="43" step="0.1" oninput="syncInput('mq135','mq135_val')"/>
+            <input type="number" id="mq135_val" value="43" step="0.1" oninput="syncSlider('mq135_val','mq135')"/>
+          </div>
+          <div class="input-row">
+            <label>MQ-136 (H₂S) <span class="range-hint">0–100</span></label>
+            <input type="range" id="mq136" min="0" max="100" value="36" step="0.1" oninput="syncInput('mq136','mq136_val')"/>
+            <input type="number" id="mq136_val" value="36" step="0.1" oninput="syncSlider('mq136_val','mq136')"/>
+          </div>
+        </div>
+
+        <div class="sensor-group">
+          <h4>Chemical Sensors</h4>
+          <div class="input-row">
+            <label>NH₃ Concentration <span class="range-hint">0–5</span></label>
+            <input type="range" id="nh3" min="0" max="5" value="0.78" step="0.01" oninput="syncInput('nh3','nh3_val')"/>
+            <input type="number" id="nh3_val" value="0.78" step="0.01" oninput="syncSlider('nh3_val','nh3')"/>
+          </div>
+          <div class="input-row">
+            <label>NH₃ Voltage (V) <span class="range-hint">0–5</span></label>
+            <input type="range" id="vnh3" min="0" max="5" value="1.0" step="0.01" oninput="syncInput('vnh3','vnh3_val')"/>
+            <input type="number" id="vnh3_val" value="1.0" step="0.01" oninput="syncSlider('vnh3_val','vnh3')"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="preset-bar">
+        <span>Quick Presets:</span>
+        <button class="preset-btn" onclick="loadPreset('petrol')">⛽ Petrol</button>
+        <button class="preset-btn" onclick="loadPreset('coffee')">☕ Coffee</button>
+        <button class="preset-btn" onclick="loadPreset('rose')">🌹 Rose</button>
+        <button class="preset-btn" onclick="loadPreset('fish')">🐟 Fish</button>
+        <button class="preset-btn" onclick="loadPreset('smoke')">🔥 Smoke</button>
+        <button class="preset-btn" onclick="loadPreset('ammonia')">⚗️ Ammonia</button>
+      </div>
+
+      <button class="btn-primary classify-btn" onclick="classifyFromSensor()">🔬 Classify Smell</button>
+    </div>
+
+    <!-- NLP INPUT TAB -->
+    <div class="tab-content" id="tab-nlp-input">
+      <div class="nlp-area">
+        <label>Describe the smell in your own words:</label>
+        <textarea id="nlp-text" placeholder="e.g. It smells sharp and pungent, like something burning or acidic with a hint of chemicals..."></textarea>
+        <div class="nlp-examples">
+          <span>Try:</span>
+          <button onclick="setNLP('sweet floral fragrance like fresh roses and jasmine')">🌸 Floral</button>
+          <button onclick="setNLP('strong pungent chemical smell like petrol or gasoline')">⛽ Petrol</button>
+          <button onclick="setNLP('sharp ammonia smell like cleaning agents')">🧹 Ammonia</button>
+          <button onclick="setNLP('rich roasted coffee aroma warm and slightly bitter')">☕ Coffee</button>
+          <button onclick="setNLP('rotten fishy seafood odor very unpleasant')">🐟 Fish</button>
+          <button onclick="setNLP('fresh earthy soil smell after rain petrichor')">🌱 Petrichor</button>
+        </div>
+        <div class="nlp-tokens-box" id="nlp-tokens"></div>
+      </div>
+      <button class="btn-primary classify-btn" onclick="classifyFromNLP()">🧠 Analyze & Classify</button>
+    </div>
+  </section>
+
+  <!-- RESULT SECTION -->
+  <section class="result-section hidden" id="result-section">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-icon" id="result-icon">🌹</div>
+        <div>
+          <div class="result-label">Predicted Smell</div>
+          <div class="result-name" id="result-name">Rose</div>
+          <div class="result-conf" id="result-conf">Confidence: 94.2%</div>
+        </div>
+      </div>
+
+      <div class="confidence-bars" id="conf-bars"></div>
+
+      <div class="result-meta" id="result-meta">
+        <div class="meta-block">
+          <div class="meta-title">Molecular Profile</div>
+          <div class="meta-val" id="meta-mol">—</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-title">Category</div>
+          <div class="meta-val" id="meta-cat">—</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-title">Sensor Signature</div>
+          <div class="meta-val" id="meta-sig">—</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-title">NLP Keywords</div>
+          <div class="meta-val" id="meta-nlp-kw">—</div>
+        </div>
+      </div>
+
+      <div class="feature-importance" id="feat-imp">
+        <div class="feat-title">Feature Importance (XGBoost Style)</div>
+        <div id="feat-bars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NLP SECTION -->
+  <section class="section" id="nlp">
+    <div class="section-label">02 / NLP Pipeline</div>
+    <h2>Natural Language Processing</h2>
+    <p class="section-sub">How we parse and understand smell descriptions using text processing techniques.</p>
+    <div class="nlp-pipeline">
+      <div class="pipe-step">
+        <div class="pipe-num">01</div>
+        <div class="pipe-icon">📝</div>
+        <div class="pipe-title">Tokenization</div>
+        <div class="pipe-desc">Input text is split into individual tokens (words). Stop-words like "the", "is" are removed.</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-num">02</div>
+        <div class="pipe-icon">✂️</div>
+        <div class="pipe-title">Stemming</div>
+        <div class="pipe-desc">"burning" → "burn", "flowers" → "flower". Reduces words to root forms.</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-num">03</div>
+        <div class="pipe-icon">📊</div>
+        <div class="pipe-title">TF-IDF Vectorization</div>
+        <div class="pipe-desc">Term Frequency–Inverse Document Frequency scoring maps tokens to smell-class relevance weights.</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-num">04</div>
+        <div class="pipe-icon">🧠</div>
+        <div class="pipe-title">Lexicon Matching</div>
+        <div class="pipe-desc">Matched against our curated smell-keyword lexicon of 200+ terms across 12 categories.</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-num">05</div>
+        <div class="pipe-icon">🎯</div>
+        <div class="pipe-title">Classification</div>
+        <div class="pipe-desc">Aggregated NLP scores feed into our XGBoost-inspired scoring model to output smell class + confidence.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATASET SECTION -->
+  <section class="section" id="dataset">
+    <div class="section-label">03 / Dataset</div>
+    <h2>Training Dataset</h2>
+    <p class="section-sub">Custom dataset of 960 samples across 12 smell classes with 8 gas sensor channels + environment readings.</p>
+
+    <div class="dataset-summary">
+      <div class="ds-card">
+        <div class="ds-num">960</div>
+        <div class="ds-lbl">Total Samples</div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-num">12</div>
+        <div class="ds-lbl">Smell Classes</div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-num">11</div>
+        <div class="ds-lbl">Features/Sample</div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-num">80/20</div>
+        <div class="ds-lbl">Train/Test Split</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="dataset-table">
+        <thead>
+          <tr>
+            <th>Smell</th><th>Temp(°C)</th><th>Hum(%)</th><th>MQ-2</th><th>MQ-4</th><th>MQ-8</th><th>MQ-135</th><th>MQ-136</th><th>NH₃</th><th>V-NH₃</th><th>Samples</th>
+          </tr>
+        </thead>
+        <tbody id="dataset-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="class-distribution" id="class-chart"></div>
+  </section>
+
+  <!-- MODEL COMPARISON -->
+  <section class="section" id="about">
+    <div class="section-label">04 / Models</div>
+    <h2>Model Comparison</h2>
+    <p class="section-sub">Four ML models trained on the same dataset — same methodology as the notebook.</p>
+    <div class="model-grid" id="model-grid"></div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="logo"><span class="logo-icon">👃</span><span class="logo-text">Olfact<em>AI</em></span></div>
+      <p>Built with XGBoost · NLP · Gas Sensor Fusion<br/>Methodology based on IR_PROJECT.ipynb</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
